@@ -1,7 +1,6 @@
 package com.finfox.auth;
 
 import com.finfox.user.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,11 +20,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final UserRepository userRepository;
     private final AuthTokenFilter authTokenFilter;
+
+    public SecurityConfig(UserRepository userRepository, AuthTokenFilter authTokenFilter) {
+        this.userRepository = userRepository;
+        this.authTokenFilter = authTokenFilter;
+    }
 
     @Bean
     public UserDetailsService userDetailsService() {
