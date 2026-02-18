@@ -3,7 +3,6 @@ package com.finfox.transaction;
 import com.finfox.transaction.dto.TransactionRequest;
 import com.finfox.user.User;
 import com.finfox.user.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,11 +12,15 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
 @Service
-@RequiredArgsConstructor
 public class TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
+
+    public TransactionService(TransactionRepository transactionRepository, UserRepository userRepository) {
+        this.transactionRepository = transactionRepository;
+        this.userRepository = userRepository;
+    }
 
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -37,7 +40,6 @@ public class TransactionService {
         transaction.setPaymentMethod(request.getPaymentMethod());
         transaction.setCreatedAt(LocalDateTime.now());
         transaction.setUpdatedAt(LocalDateTime.now());
-        
         return transactionRepository.save(transaction);
     }
 
@@ -60,13 +62,12 @@ public class TransactionService {
                 .orElseThrow(() -> new RuntimeException("Transaction not found or access denied"));
         transactionRepository.delete(transaction);
     }
-    
+
     public Transaction updateTransaction(String id, TransactionRequest request) {
-         User user = getCurrentUser();
+        User user = getCurrentUser();
         Transaction transaction = transactionRepository.findById(id)
                 .filter(t -> t.getUserId().equals(user.getId()))
                 .orElseThrow(() -> new RuntimeException("Transaction not found or access denied"));
-        
         transaction.setDate(request.getDate());
         transaction.setAmount(request.getAmount());
         transaction.setDescription(request.getDescription());
@@ -74,7 +75,6 @@ public class TransactionService {
         transaction.setType(request.getType());
         transaction.setPaymentMethod(request.getPaymentMethod());
         transaction.setUpdatedAt(LocalDateTime.now());
-        
         return transactionRepository.save(transaction);
     }
 }
