@@ -3,7 +3,6 @@ package com.finfox.budget;
 import com.finfox.budget.dto.BudgetRequest;
 import com.finfox.user.User;
 import com.finfox.user.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -11,11 +10,15 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class BudgetService {
 
     private final BudgetRepository budgetRepository;
     private final UserRepository userRepository;
+
+    public BudgetService(BudgetRepository budgetRepository, UserRepository userRepository) {
+        this.budgetRepository = budgetRepository;
+        this.userRepository = userRepository;
+    }
 
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -32,10 +35,9 @@ public class BudgetService {
         budget.setPeriod(request.getPeriod());
         budget.setStartDate(request.getStartDate());
         budget.setEndDate(request.getEndDate());
-        
         return budgetRepository.save(budget);
     }
-    
+
     public List<Budget> getUserBudgets() {
         User user = getCurrentUser();
         return budgetRepository.findByUserId(user.getId());

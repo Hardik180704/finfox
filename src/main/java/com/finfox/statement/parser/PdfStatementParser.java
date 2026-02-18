@@ -3,26 +3,30 @@ package com.finfox.statement.parser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.finfox.transaction.dto.TransactionRequest;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.springframework.ai.chat.client.ChatClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.ai.anthropic.AnthropicChatModel;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
-@RequiredArgsConstructor
-@Slf4j
 public class PdfStatementParser implements StatementParser {
 
-    private final ChatClient.Builder chatClientBuilder;
+    private static final Logger log = LoggerFactory.getLogger(PdfStatementParser.class);
+
+    private final AnthropicChatModel chatModel;
     private final ObjectMapper objectMapper;
+
+    public PdfStatementParser(AnthropicChatModel chatModel, ObjectMapper objectMapper) {
+        this.chatModel = chatModel;
+        this.objectMapper = objectMapper;
+    }
 
     @Override
     public boolean canParse(String fileType) {
@@ -32,8 +36,7 @@ public class PdfStatementParser implements StatementParser {
     @Override
     public List<TransactionRequest> parse(MultipartFile file) throws IOException {
         String text = extractTextFromPdf(file.getInputStream());
-        
-        // Use AI to parse the text into structured JSON
+
         String prompt = """
             You are a financial assistant. Key tasks:
             1. Analyze the following bank statement text.
@@ -46,10 +49,8 @@ public class PdfStatementParser implements StatementParser {
             %s
             """.formatted(text);
 
-        ChatClient chatClient = chatClientBuilder.build();
-        String jsonResponse = chatClient.prompt().user(prompt).call().content();
+        String jsonResponse = chatModel.call(prompt);
 
-        // Clean up response if it contains markdown code blocks
         if (jsonResponse.contains("```json")) {
             jsonResponse = jsonResponse.substring(jsonResponse.indexOf("```json") + 7);
             jsonResponse = jsonResponse.substring(0, jsonResponse.lastIndexOf("```"));
@@ -67,7 +68,7 @@ public class PdfStatementParser implements StatementParser {
     }
 
     private String extractTextFromPdf(InputStream inputStream) throws IOException {
-        try (PDDocument document = PDDocument.load(inputStream)) {
+        try (PDDocument document = org.apache.pdfbox.Loader.loadPDF(inputStream.readAllBytes())) {
             PDFTextStripper stripper = new PDFTextStripper();
             return stripper.getText(document);
         }
