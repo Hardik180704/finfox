@@ -1,7 +1,5 @@
 package com.finfox.ai;
 
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,11 +7,15 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/ai")
-@RequiredArgsConstructor
 public class AiController {
 
     private final AiAdvisorService aiAdvisorService;
     private final NlpQueryService nlpQueryService;
+
+    public AiController(AiAdvisorService aiAdvisorService, NlpQueryService nlpQueryService) {
+        this.aiAdvisorService = aiAdvisorService;
+        this.nlpQueryService = nlpQueryService;
+    }
 
     @GetMapping("/savings-report")
     public ResponseEntity<String> getSavingsReport() {

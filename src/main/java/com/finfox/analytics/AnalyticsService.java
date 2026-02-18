@@ -4,27 +4,30 @@ import com.finfox.transaction.Transaction;
 import com.finfox.transaction.TransactionRepository;
 import com.finfox.user.User;
 import com.finfox.user.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class AnalyticsService {
 
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final MongoTemplate mongoTemplate;
+
+    public AnalyticsService(TransactionRepository transactionRepository, UserRepository userRepository,
+                            MongoTemplate mongoTemplate) {
+        this.transactionRepository = transactionRepository;
+        this.userRepository = userRepository;
+        this.mongoTemplate = mongoTemplate;
+    }
 
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -35,9 +38,6 @@ public class AnalyticsService {
     public Map<String, BigDecimal> getMonthlySpend() {
         User user = getCurrentUser();
         List<Transaction> transactions = transactionRepository.findAllByUserId(user.getId());
-        
-        // Group by YearMonth and sum amount
-        // Filter only EXPENSE
         return transactions.stream()
                 .filter(t -> "EXPENSE".equalsIgnoreCase(t.getType()))
                 .collect(Collectors.groupingBy(
@@ -49,7 +49,6 @@ public class AnalyticsService {
     public Map<String, BigDecimal> getCategoryBreakdown() {
         User user = getCurrentUser();
         List<Transaction> transactions = transactionRepository.findAllByUserId(user.getId());
-        
         return transactions.stream()
                 .filter(t -> "EXPENSE".equalsIgnoreCase(t.getType()))
                 .collect(Collectors.groupingBy(
