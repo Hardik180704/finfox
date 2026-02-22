@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Receipt, Upload, Bot, Wallet, BarChart3 } from "lucide-react";
+import { Component, LayoutDashboard, Receipt, Upload, Bot, Wallet, BarChart3, PieChart } from "lucide-react";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -23,6 +23,11 @@ const sidebarNavItems = [
     title: "Budgets",
     href: "/dashboard/budgets",
     icon: Wallet,
+  },
+  {
+    title: "Assets",
+    href: "/dashboard/assets",
+    icon: PieChart,
   },
   {
     title: "Import",

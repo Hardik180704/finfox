@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuthStore } from "@/store/auth";
 import { useRouter } from "next/navigation";
+import { DownloadCloud } from "lucide-react";
+import api from "@/lib/api";
 
 export function Header() {
   const { user, logout } = useAuthStore();
@@ -23,6 +25,24 @@ export function Header() {
   const handleLogout = () => {
     logout();
     router.push("/login");
+  };
+
+  const handleDownloadReport = async () => {
+    try {
+      const response = await api.get('/reports/financial-health', {
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'financial-health-report.pdf');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading report:', error);
+    }
   };
 
   const initials = user ? `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase() : "U";
@@ -43,6 +63,11 @@ export function Header() {
       
       <div className="flex w-full items-center justify-end gap-3 md:ml-auto mt-4 lg:mt-6 mb-4 lg:mb-6">
         
+        <Button onClick={handleDownloadReport} variant="outline" size="sm" className="hidden sm:flex gap-2 text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100 hover:text-blue-700">
+          <DownloadCloud className="h-4 w-4" />
+          Export Report
+        </Button>
+
         <Button variant="ghost" size="icon" className="rounded-full text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 h-9 w-9">
           <Bell className="h-4 w-4" />
         </Button>
