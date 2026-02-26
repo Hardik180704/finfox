@@ -53,8 +53,9 @@ export default function RegisterPage() {
       setAuth(token, { email, firstName, lastName });
       toast.success("Account created successfully");
       router.push("/dashboard");
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Registration failed.");
+    } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      toast.error((error as any).response?.data?.message || "Registration failed.");
     } finally {
       setIsLoading(false);
     }

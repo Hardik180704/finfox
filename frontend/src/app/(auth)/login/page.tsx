@@ -49,8 +49,9 @@ export default function LoginPage() {
       setAuth(token, { email, firstName, lastName });
       toast.success("Signed in successfully");
       router.push("/dashboard");
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Invalid credentials.");
+    } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      toast.error((error as any).response?.data?.message || "Invalid credentials.");
     } finally {
       setIsLoading(false);
     }
@@ -133,7 +134,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center text-sm font-medium text-neutral-500 mt-8">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link href="/register" className="text-blue-600 hover:text-blue-700 hover:underline underline-offset-4 transition-colors">
             Sign up
           </Link>

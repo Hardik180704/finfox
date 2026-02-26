@@ -4,9 +4,9 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Component, LayoutDashboard, Receipt, Upload, Bot, Wallet, BarChart3, PieChart } from "lucide-react";
+import { LayoutDashboard, Receipt, Upload, Bot, Wallet, BarChart3, PieChart } from "lucide-react";
 
-interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
+type SidebarProps = React.HTMLAttributes<HTMLDivElement>;
 
 const sidebarNavItems = [
   {

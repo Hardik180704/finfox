@@ -73,7 +73,7 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h2 className="text-2xl font-heading font-bold tracking-tight text-neutral-900 mb-1">Financial Overview</h2>
-          <p className="text-neutral-500 text-sm font-medium tracking-tight">Here's what's happening with your money today.</p>
+          <p className="text-neutral-500 text-sm font-medium tracking-tight">Here&apos;s what&apos;s happening with your money today.</p>
         </div>
         <div className="flex items-center gap-2">
            <Button variant="outline" size="sm" className="h-9 bg-white border-black/[0.06] shadow-sm text-neutral-700 font-medium">
