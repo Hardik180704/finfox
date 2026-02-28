@@ -19,23 +19,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-const data = [
-  { name: "Jan", income: 4000, expense: 2400 },
-  { name: "Feb", income: 3000, expense: 1398 },
-  { name: "Mar", income: 2000, expense: 9800 },
-  { name: "Apr", income: 2780, expense: 3908 },
-  { name: "May", income: 1890, expense: 4800 },
-  { name: "Jun", income: 2390, expense: 3800 },
-];
-
-const recentTransactions = [
-  { id: 1, date: "2024-03-01", description: "Grocery Store", amount: -120.50, category: "Food", type: "EXPENSE" },
-  { id: 2, date: "2024-03-02", description: "Salary", amount: 4500.00, category: "Income", type: "INCOME" },
-  { id: 3, date: "2024-03-03", description: "Electric Bill", amount: -85.20, category: "Utilities", type: "EXPENSE" },
-  { id: 4, date: "2024-03-04", description: "Coffee Shop", amount: -4.50, category: "Food", type: "EXPENSE" },
-  { id: 5, date: "2024-03-05", description: "Internet", amount: -60.00, category: "Utilities", type: "EXPENSE" },
-];
+import api from "@/lib/api";
+import { Transaction, MonthlySpend } from "@/lib/types";
 
 function CardWrapper({ children, className = "" }: { children: React.ReactNode, className?: string }) {
   return (
@@ -48,14 +33,42 @@ function CardWrapper({ children, className = "" }: { children: React.ReactNode, 
 export default function DashboardPage() {
   const [summary, setSummary] = useState({ income: 0, expense: 0, balance: 0 });
   const [loading, setLoading] = useState(true);
+  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
+  const [monthlySpends, setMonthlySpends] = useState<MonthlySpend>({});
+
+  const fetchDashboardData = async () => {
+    try {
+      const [transactionsRes, analyticsRes] = await Promise.all([
+        api.get('/transactions?size=5&sort=date,desc'),
+        api.get('/analytics/monthly')
+      ]);
+
+      const txs = transactionsRes.data.content || transactionsRes.data;
+      setRecentTransactions(txs.slice(0, 5));
+      setMonthlySpends(analyticsRes.data);
+
+      const income = txs.filter((t: Transaction) => t.type === 'INCOME').reduce((acc: number, t: Transaction) => acc + t.amount, 0);
+      const expense = txs.filter((t: Transaction) => t.type === 'EXPENSE').reduce((acc: number, t: Transaction) => acc + t.amount, 0);
+      setSummary({ income, expense, balance: income - expense });
+
+    } catch (error) {
+      console.error("Error fetching dashboard data", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setSummary({ income: 8400, expense: 3450, balance: 4950 });
-      setLoading(false);
-    }, 500);
+    fetchDashboardData();
   }, []);
+
+  const formatChartData = () => {
+    return Object.keys(monthlySpends).sort().map(month => ({
+      name: month,
+      income: monthlySpends[month].INCOME || 0,
+      expense: monthlySpends[month].EXPENSE || 0,
+    }));
+  };
 
   if (loading) {
     return (
@@ -124,7 +137,7 @@ export default function DashboardPage() {
           </div>
           <div className="flex-1 w-full relative min-h-0">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+              <BarChart data={formatChartData()} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e5e5" />
                 <XAxis 
                   dataKey="name" 
@@ -192,8 +205,8 @@ export default function DashboardPage() {
                       <div className="text-xs font-medium text-neutral-500 mt-1">{tx.category}</div>
                     </TableCell>
                     <TableCell className="text-right py-3.5">
-                      <div className={`text-sm font-semibold ${tx.amount > 0 ? "text-emerald-600" : "text-neutral-900"}`}>
-                        {tx.amount > 0 ? '+' : ''}{tx.amount.toFixed(2)}
+                      <div className={`text-sm font-semibold ${tx.type === 'INCOME' ? "text-emerald-600" : "text-neutral-900"}`}>
+                        {tx.type === 'INCOME' ? '+' : '-'}${tx.amount.toFixed(2)}
                       </div>
                     </TableCell>
                     <TableCell className="py-3.5 text-right">

@@ -35,14 +35,17 @@ public class AnalyticsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
-    public Map<String, BigDecimal> getMonthlySpend() {
+    public Map<String, Map<String, BigDecimal>> getMonthlySpend() {
         User user = getCurrentUser();
         List<Transaction> transactions = transactionRepository.findAllByUserId(user.getId());
+        
         return transactions.stream()
-                .filter(t -> "EXPENSE".equalsIgnoreCase(t.getType()))
                 .collect(Collectors.groupingBy(
                         t -> YearMonth.from(t.getDate()).toString(),
-                        Collectors.reducing(BigDecimal.ZERO, Transaction::getAmount, BigDecimal::add)
+                        Collectors.groupingBy(
+                                Transaction::getType,
+                                Collectors.reducing(BigDecimal.ZERO, Transaction::getAmount, BigDecimal::add)
+                        )
                 ));
     }
 

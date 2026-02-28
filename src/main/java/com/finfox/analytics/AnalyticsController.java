@@ -22,7 +22,7 @@ public class AnalyticsController {
     }
 
     @GetMapping("/monthly")
-    public ResponseEntity<Map<String, BigDecimal>> getMonthlySpend() {
+    public ResponseEntity<Map<String, Map<String, BigDecimal>>> getMonthlySpend() {
         return ResponseEntity.ok(analyticsService.getMonthlySpend());
     }
 
