@@ -137,6 +137,31 @@ You must maintain environment variables to support application functionality.
 
 ### Installation & Setup
 
+You can run Finfox locally using the traditional manual setup or via Docker Compose.
+
+#### Option 1: Using Docker Compose (Recommended)
+This method spins up the entire stack including MongoDB, Backend API, Frontend Next.js app, and an Nginx Gateway.
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-username/finfox.git
+   cd finfox
+   ```
+
+2. **Run the stack**
+   Ensure your environment variables (e.g., `ANTHROPIC_API_KEY`) are exported into your environment, then build and start the containers:
+   ```bash
+   export ANTHROPIC_API_KEY="your-api-key"
+   docker-compose up -d --build
+   ```
+
+3. **Access the application**
+   - **Main UI (via Nginx):** `http://localhost`
+   - **Backend API:** `http://localhost:8080`
+   - **MongoDB Direct Access:** `localhost:27017`
+
+#### Option 2: Manual Setup
+
 1. **Clone the repository**
    ```bash
    git clone https://github.com/your-username/finfox.git
@@ -188,12 +213,21 @@ npm run lint
 
 ## 📦 Deployment
 
+### Full Stack via Docker Compose
+Finfox provides a `docker-compose.yml` file that orchestrates the MongoDB engine, internal Spring Boot backend, frontend Node layer, and traffic mapping through an **Nginx Gateway** on port 80.
+1. Provide necessary environment variables in your server.
+2. Run the deployment setup:
+   ```bash
+   docker-compose up -d --build
+   ```
+
 ### Backend (Docker/JAR)
 1. Package the application:
    ```bash
    mvn clean package -DskipTests
    ```
 2. The executable JAR will be generated in `target/finfox-0.0.1-SNAPSHOT.jar`. Run it with standard `java -jar`.
+   Alternatively, you can build the Docker image explicitly using the provided root `Dockerfile`.
 
 ### Frontend (Vercel/Node Platform)
 1. The frontend can be easily deployed on Vercel or any Node.js environment.
